@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Profile Setup - AI Study Buddy{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 style="color: var(--primary-blue); text-align: center; margin-bottom: 2rem;">
+        <i class="fas fa-user-cog"></i> Set Up Your Learning Profile
+    </h1>
+    
+    <p style="text-align: center; margin-bottom: 3rem; font-size: 1.1rem;">
+        Help our AI understand your academic background to provide personalized recommendations
+    </p>
+    
+    <form method="POST" action="{{ url_for('upload_profile') }}" enctype="multipart/form-data">
+        <div class="grid grid-2">
+            <div>
+                <h3 style="color: var(--primary-green); margin-bottom: 1.5rem;">
+                    <i class="fas fa-book"></i> Your Subjects
+                </h3>
+                
+                <div class="form-group">
+                    <label>Select your subjects:</label>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" name="subjects" value="Mathematics" onchange="toggleMarkInput('Mathematics')">
+                            <i class="fas fa-calculator"></i> Mathematics
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" name="subjects" value="Physics" onchange="toggleMarkInput('Physics')">
+                            <i class="fas fa-atom"></i> Physics
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" name="subjects" value="Chemistry" onchange="toggleMarkInput('Chemistry')">
+                            <i class="fas fa-flask"></i> Chemistry
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" name="subjects" value="Biology" onchange="toggleMarkInput('Biology')">
+                            <i class="fas fa-dna"></i> Biology
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" name="subjects" value="English" onchange="toggleMarkInput('English')">
+                            <i class="fas fa-language"></i> English
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" name="subjects" value="History" onchange="toggleMarkInput('History')">
+                            <i class="fas fa-landmark"></i> History
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" name="subjects" value="Geography" onchange="toggleMarkInput('Geography')">
+                            <i class="fas fa-globe"></i> Geography
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" name="subjects" value="Computer Science" onchange="toggleMarkInput('Computer Science')">
+                            <i class="fas fa-laptop-code"></i> Computer Science
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 style="color: var(--primary-green); margin-bottom: 1.5rem;">
+                    <i class="fas fa-chart-bar"></i> Previous Marks
+                </h3>
+                
+                <div id="marks-container">
+                    <p style="color: var(--text-color); font-style: italic;">
+                        Select subjects above to enter your previous marks
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 2rem;">
+            <label for="syllabus">
+                <i class="fas fa-file-upload"></i> Upload Syllabus (Optional)
+            </label>
+            <input type="file" id="syllabus" name="syllabus" accept=".pdf,.doc,.docx,.txt">
+            <small style="color: var(--text-color); opacity: 0.7;">
+                Upload your syllabus to help AI provide more targeted recommendations
+            </small>
+        </div>
+        
+        <div style="text-align: center; margin-top: 3rem;">
+            <button type="submit" class="btn btn-primary" style="padding: 1rem 3rem; font-size: 1.1rem;">
+                <i class="fas fa-brain"></i> Analyze My Profile
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function toggleMarkInput(subject) {
+    const checkbox = event.target;
+    const container = document.getElementById('marks-container');
+    
+    if (checkbox.checked) {
+        // Add marks input for this subject
+        const markDiv = document.createElement('div');
+        markDiv.className = 'form-group';
+        markDiv.id = `marks-${subject}`;
+        markDiv.innerHTML = `
+            <label for="marks_${subject}">
+                <i class="fas fa-percentage"></i> ${subject} - Previous Score (%)
+            </label>
+            <input type="number" id="marks_${subject}" name="marks_${subject}" 
+                   min="0" max="100" placeholder="Enter percentage (0-100)" required>
+        `;
+        container.appendChild(markDiv);
+    } else {
+        // Remove marks input for this subject
+        const markDiv = document.getElementById(`marks-${subject}`);
+        if (markDiv) {
+            markDiv.remove();
+        }
+    }
+    
+    // Update container message if no subjects selected
+    const hasInputs = container.querySelectorAll('.form-group').length > 0;
+    if (!hasInputs) {
+        container.innerHTML = `
+            <p style="color: var(--text-color); font-style: italic;">
+                Select subjects above to enter your previous marks
+            </p>
+        `;
+    }
+}
+</script>
+{% endblock %}

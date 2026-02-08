@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Study Planner - AI Study Buddy{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 style="color: var(--primary-blue); margin-bottom: 2rem;">
+        <i class="fas fa-calendar-alt"></i> Smart Study Planner
+    </h1>
+    
+    {% if not profile %}
+    <div style="text-align: center; padding: 3rem;">
+        <i class="fas fa-user-plus" style="font-size: 4rem; color: var(--primary-green); margin-bottom: 2rem;"></i>
+        <h2 style="color: var(--primary-blue); margin-bottom: 1rem;">Profile Required</h2>
+        <p style="margin-bottom: 2rem; font-size: 1.1rem;">
+            Complete your profile to get a personalized study plan
+        </p>
+        <a href="{{ url_for('profile_setup') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-right"></i> Set Up Profile
+        </a>
+    </div>
+    {% else %}
+    
+    <div class="grid grid-2">
+        <!-- Today's Plan -->
+        <div class="card" style="background: linear-gradient(135deg, var(--light-blue), var(--primary-blue)); color: white;">
+            <h2><i class="fas fa-today"></i> Today's Study Plan</h2>
+            <p style="margin-bottom: 2rem; opacity: 0.9;">{{ "Monday, January 25, 2026" }}</p>
+            
+            {% if plan %}
+                {% for subject, duration in plan.items() %}
+                <div style="background-color: rgba(255,255,255,0.2); padding: 1rem; margin-bottom: 1rem; border-radius: 5px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="fas fa-book"></i> {{ subject }}</span>
+                        <span style="font-weight: bold;">{{ duration }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="opacity: 0.9;">AI is generating your personalized study plan...</p>
+            {% endif %}
+        </div>
+        
+        <!-- Weekly Overview -->
+        <div class="card">
+            <h3 style="color: var(--primary-green); margin-bottom: 1.5rem;">
+                <i class="fas fa-calendar-week"></i> This Week's Focus
+            </h3>
+            
+            {% if profile.analysis.weaknesses %}
+            <div style="margin-bottom: 2rem;">
+                <h4 style="color: var(--primary-blue); margin-bottom: 1rem;">Priority Subjects</h4>
+                {% for weakness in profile.analysis.weaknesses %}
+                <div style="background-color: var(--light-blue); padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 5px; color: var(--text-color);">
+                    <i class="fas fa-exclamation-triangle"></i> {{ weakness }} - Needs extra attention
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div>
+                <h4 style="color: var(--primary-green); margin-bottom: 1rem;">Study Goals</h4>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                        <i class="fas fa-target" style="color: var(--primary-green);"></i> 
+                        Complete 2 practice tests this week
+                    </li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                        <i class="fas fa-clock" style="color: var(--primary-blue);"></i> 
+                        Study 6 hours daily with breaks
+                    </li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                        <i class="fas fa-brain" style="color: var(--primary-green);"></i> 
+                        Focus on weak subjects: {{ profile.analysis.weaknesses|join(', ') if profile.analysis.weaknesses else 'None identified' }}
+                    </li>
+                    <li style="padding: 0.5rem 0;">
+                        <i class="fas fa-book-open" style="color: var(--primary-blue);"></i> 
+                        Review previous topics daily
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Study Schedule -->
+    <div class="card">
+        <h3 style="color: var(--primary-blue); margin-bottom: 2rem;">
+            <i class="fas fa-clock"></i> Recommended Daily Schedule
+        </h3>
+        
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            <div>
+                <h4 style="color: var(--primary-green); margin-bottom: 1rem;">Morning Session (9:00 AM - 12:00 PM)</h4>
+                <div style="background-color: var(--light-green); padding: 1rem; border-radius: 8px; color: var(--text-color);">
+                    <p><strong>Focus:</strong> Most challenging subjects</p>
+                    <p><strong>Duration:</strong> 3 hours with 15-min breaks</p>
+                    <p><strong>Subjects:</strong> {{ profile.analysis.weaknesses|join(', ') if profile.analysis.weaknesses else 'Core subjects' }}</p>
+                </div>
+            </div>
+            
+            <div>
+                <h4 style="color: var(--primary-green); margin-bottom: 1rem;">Afternoon Session (2:00 PM - 5:00 PM)</h4>
+                <div style="background-color: var(--light-blue); padding: 1rem; border-radius: 8px; color: var(--text-color);">
+                    <p><strong>Focus:</strong> Practice and revision</p>
+                    <p><strong>Duration:</strong> 3 hours with breaks</p>
+                    <p><strong>Activities:</strong> Quizzes, problem solving, review</p>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem; text-align: center;">
+            <button onclick="generateNewPlan()" class="btn btn-primary" style="margin-right: 1rem;">
+                <i class="fas fa-sync-alt"></i> Generate New Plan
+            </button>
+            <a href="{{ url_for('ai_chat') }}" class="btn btn-secondary">
+                <i class="fas fa-comments"></i> Ask AI About Schedule
+            </a>
+        </div>
+    </div>
+    
+    <!-- Progress Tracking -->
+    <div class="card">
+        <h3 style="color: var(--primary-blue); margin-bottom: 2rem;">
+            <i class="fas fa-chart-line"></i> Study Progress Tracker
+        </h3>
+        
+        <div class="grid grid-3">
+            <div style="text-align: center; padding: 1rem; background-color: var(--light-green); border-radius: 8px; color: var(--text-color);">
+                <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <h4>Sessions Completed</h4>
+                <p style="font-size: 1.5rem; font-weight: bold;">12/15</p>
+                <p>This Week</p>
+            </div>
+            
+            <div style="text-align: center; padding: 1rem; background-color: var(--light-blue); border-radius: 8px; color: var(--text-color);">
+                <i class="fas fa-clock" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <h4>Hours Studied</h4>
+                <p style="font-size: 1.5rem; font-weight: bold;">42</p>
+                <p>This Week</p>
+            </div>
+            
+            <div style="text-align: center; padding: 1rem; background-color: var(--card-bg); border: 2px solid var(--primary-green); border-radius: 8px;">
+                <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--primary-green);"></i>
+                <h4 style="color: var(--primary-green);">Streak</h4>
+                <p style="font-size: 1.5rem; font-weight: bold; color: var(--primary-green);">7 Days</p>
+                <p>Keep it up!</p>
+            </div>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+
+<script>
+function generateNewPlan() {
+    // In a real app, this would make an API call to regenerate the plan
+    alert('Generating new personalized study plan based on your latest progress...');
+    location.reload();
+}
+</script>
+{% endblock %}

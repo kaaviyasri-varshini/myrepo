@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - AI Study Buddy{% endblock %}
+
+{% block content %}
+<div class="grid grid-2">
+    <div class="card">
+        <h2 style="color: var(--primary-blue); margin-bottom: 2rem; text-align: center;">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+        </h2>
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="login-email">
+                    <i class="fas fa-envelope"></i> Email Address
+                </label>
+                <input type="email" id="login-email" name="email" required 
+                       placeholder="Enter your email">
+            </div>
+            
+            <div class="form-group">
+                <label for="login-password">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                <input type="password" id="login-password" name="password" required 
+                       placeholder="Enter your password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 1rem; color: var(--text-color);">
+            <p><strong>Demo Credentials:</strong></p>
+            <p>Email: student@example.com</p>
+            <p>Password: password123</p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2 style="color: var(--primary-green); margin-bottom: 2rem; text-align: center;">
+            <i class="fas fa-user-plus"></i> Create Account
+        </h2>
+        
+        <form method="POST" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label for="register-name">
+                    <i class="fas fa-user"></i> Full Name
+                </label>
+                <input type="text" id="register-name" name="name" required 
+                       placeholder="Enter your full name">
+            </div>
+            
+            <div class="form-group">
+                <label for="register-email">
+                    <i class="fas fa-envelope"></i> Email Address
+                </label>
+                <input type="email" id="register-email" name="email" required 
+                       placeholder="Enter your email">
+            </div>
+            
+            <div class="form-group">
+                <label for="register-password">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                <input type="password" id="register-password" name="password" required 
+                       placeholder="Create a password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="card" style="text-align: center; margin-top: 2rem;">
+    <h1 style="color: var(--primary-blue); margin-bottom: 1rem;">
+        <i class="fas fa-robot"></i> Welcome to AI Study Buddy
+    </h1>
+    <p style="font-size: 1.2rem; margin-bottom: 2rem;">
+        Your intelligent companion for personalized learning and academic success
+    </p>
+    
+    <div class="grid grid-3">
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-chart-line" style="font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--primary-green);">Performance Analysis</h3>
+            <p>AI analyzes your marks and identifies strengths & weaknesses</p>
+        </div>
+        
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-calendar-check" style="font-size: 3rem; color: var(--primary-green); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--primary-blue);">Smart Planning</h3>
+            <p>Personalized study schedules that adapt to your progress</p>
+        </div>
+        
+        <div style="text-align: center; padding: 1rem;">
+            <i class="fas fa-comments" style="font-size: 3rem; color: var(--primary-blue); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--primary-green);">AI Tutor</h3>
+            <p>Ask questions naturally and get step-by-step explanations</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

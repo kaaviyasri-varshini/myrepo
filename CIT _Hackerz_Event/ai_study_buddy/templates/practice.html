@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Practice & Assessment - AI Study Buddy{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 style="color: var(--primary-blue); margin-bottom: 2rem;">
+        <i class="fas fa-brain"></i> Practice & Assessment
+    </h1>
+    
+    {% if not profile %}
+    <div style="text-align: center; padding: 3rem;">
+        <i class="fas fa-user-plus" style="font-size: 4rem; color: var(--primary-green); margin-bottom: 2rem;"></i>
+        <h2 style="color: var(--primary-blue); margin-bottom: 1rem;">Profile Required</h2>
+        <p style="margin-bottom: 2rem; font-size: 1.1rem;">
+            Complete your profile to get personalized practice questions
+        </p>
+        <a href="{{ url_for('profile_setup') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-right"></i> Set Up Profile
+        </a>
+    </div>
+    {% else %}
+    
+    <div class="grid grid-2">
+        <!-- Quiz Generator -->
+        <div class="card">
+            <h3 style="color: var(--primary-green); margin-bottom: 1.5rem;">
+                <i class="fas fa-question-circle"></i> Generate Practice Quiz
+            </h3>
+            
+            <div class="form-group">
+                <label for="quiz-subject">Select Subject:</label>
+                <select id="quiz-subject" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 5px; background-color: var(--bg-color); color: var(--text-color);">
+                    {% for subject in profile.subjects %}
+                    <option value="{{ subject }}">{{ subject }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="quiz-difficulty">Difficulty Level:</label>
+                <select id="quiz-difficulty" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 5px; background-color: var(--bg-color); color: var(--text-color);">
+                    <option value="easy">Easy - Basic concepts</option>
+                    <option value="medium" selected>Medium - Standard level</option>
+                    <option value="hard">Hard - Advanced topics</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="quiz-type">Question Type:</label>
+                <select id="quiz-type" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 5px; background-color: var(--bg-color); color: var(--text-color);">
+                    <option value="mcq">Multiple Choice Questions</option>
+                    <option value="short">Short Answer Questions</option>
+                    <option value="mixed">Mixed Question Types</option>
+                </select>
+            </div>
+            
+            <button onclick="generateQuiz()" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                <i class="fas fa-magic"></i> Generate Quiz
+            </button>
+        </div>
+        
+        <!-- Quick Practice -->
+        <div class="card">
+            <h3 style="color: var(--primary-blue); margin-bottom: 1.5rem;">
+                <i class="fas fa-flash"></i> Quick Practice
+            </h3>
+            
+            <p style="margin-bottom: 2rem;">
+                Jump into practice sessions based on your weak areas
+            </p>
+            
+            {% if profile.analysis.weaknesses %}
+            <div style="margin-bottom: 2rem;">
+                <h4 style="color: var(--primary-green); margin-bottom: 1rem;">Recommended Practice</h4>
+                {% for weakness in profile.analysis.weaknesses %}
+                <button onclick="quickPractice('{{ weakness }}')" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem; text-align: left;">
+                    <i class="fas fa-target"></i> {{ weakness }} - Focus Practice
+                </button>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div>
+                <h4 style="color: var(--primary-blue); margin-bottom: 1rem;">All Subjects</h4>
+                {% for subject in profile.subjects %}
+                <button onclick="quickPractice('{{ subject }}')" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem; text-align: left;">
+                    <i class="fas fa-book"></i> {{ subject }} Practice
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quiz Area -->
+    <div id="quiz-container" style="display: none;">
+        <div class="card">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 2rem;">
+                <h3 style="color: var(--primary-blue);">
+                    <i class="fas fa-clipboard-list"></i> <span id="quiz-title">Practice Quiz</span>
+                </h3>
+                <button onclick="closeQuiz()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Close Quiz
+                </button>
+            </div>
+            
+            <div id="quiz-content">
+                <!-- Quiz questions will be loaded here -->
+            </div>
+            
+            <div id="quiz-results" style="display: none;">
+                <!-- Quiz results will be shown here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Performance Stats -->
+    <div class="card">
+        <h3 style="color: var(--primary-blue); margin-bottom: 2rem;">
+            <i class="fas fa-chart-bar"></i> Practice Performance
+        </h3>
+        
+        <div class="grid grid-3">
+            <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, var(--light-green), var(--primary-green)); color: white; border-radius: 10px;">
+                <i class="fas fa-trophy" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                <h4>Quizzes Completed</h4>
+                <p style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0;">23</p>
+                <p style="opacity: 0.9;">This month</p>
+            </div>
+            
+            <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, var(--light-blue), var(--primary-blue)); color: white; border-radius: 10px;">
+                <i class="fas fa-percentage" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                <h4>Average Score</h4>
+                <p style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0;">78%</p>
+                <p style="opacity: 0.9;">Improving!</p>
+            </div>
+            
+            <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue)); color: white; border-radius: 10px;">
+                <i class="fas fa-fire" style="font-size: 2.5rem; margin-bottom: 1rem;"></i>
+                <h4>Practice Streak</h4>
+                <p style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0;">12</p>
+                <p style="opacity: 0.9;">Days in a row</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <h4 style="color: var(--primary-green); margin-bottom: 1rem;">Subject-wise Performance</h4>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                {% for subject in profile.subjects %}
+                <div style="padding: 1rem; background-color: var(--card-bg); border-radius: 8px; border: 2px solid var(--border-color);">
+                    <h5 style="color: var(--primary-blue); margin-bottom: 0.5rem;">{{ subject }}</h5>
+                    <div style="background-color: var(--border-color); height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, var(--primary-green), var(--light-green)); height: 100%; width: {{ profile.marks[subject] }}%; border-radius: 4px;"></div>
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-color);">{{ profile.marks[subject] }}% accuracy</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+
+<script>
+let currentQuiz = null;
+let currentQuestionIndex = 0;
+let userAnswers = [];
+
+async function generateQuiz() {
+    const subject = document.getElementById('quiz-subject').value;
+    const difficulty = document.getElementById('quiz-difficulty').value;
+    const type = document.getElementById('quiz-type').value;
+    
+    try {
+        const response = await fetch('/generate-quiz', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                subject: subject, 
+                difficulty: difficulty, 
+                type: type 
+            })
+        });
+        
+        const data = await response.json();
+        currentQuiz = data.questions;
+        currentQuestionIndex = 0;
+        userAnswers = [];
+        
+        document.getElementById('quiz-title').textContent = `${subject} Quiz - ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Level`;
+        document.getElementById('quiz-container').style.display = 'block';
+        document.getElementById('quiz-results').style.display = 'none';
+        
+        showQuestion();
+        
+        // Scroll to quiz
+        document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth' });
+        
+    } catch (error) {
+        alert('Error generating quiz. Please try again.');
+    }
+}
+
+function quickPractice(subject) {
+    document.getElementById('quiz-subject').value = subject;
+    document.getElementById('quiz-difficulty').value = 'medium';
+    generateQuiz();
+}
+
+function showQuestion() {
+    if (!currentQuiz || currentQuestionIndex >= currentQuiz.length) {
+        showResults();
+        return;
+    }
+    
+    const question = currentQuiz[currentQuestionIndex];
+    const quizContent = document.getElementById('quiz-content');
+    
+    quizContent.innerHTML = `
+        <div style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <span style="color: var(--primary-green); font-weight: bold;">Question ${currentQuestionIndex + 1} of ${currentQuiz.length}</span>
+                <div style="background-color: var(--border-color); width: 200px; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div style="background: linear-gradient(90deg, var(--primary-blue), var(--primary-green)); height: 100%; width: ${((currentQuestionIndex + 1) / currentQuiz.length) * 100}%; border-radius: 4px;"></div>
+                </div>
+            </div>
+            
+            <h4 style="color: var(--primary-blue); margin-bottom: 2rem;">${question.question}</h4>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                ${question.options.map((option, index) => `
+                    <label style="display: flex; align-items: center; padding: 1rem; background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.3s;" 
+                           onmouseover="this.style.borderColor='var(--primary-blue)'" 
+                           onmouseout="this.style.borderColor='var(--border-color)'">
+                        <input type="radio" name="answer" value="${index}" style="margin-right: 1rem;">
+                        <span>${option}</span>
+                    </label>
+                `).join('')}
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button onclick="nextQuestion()" class="btn btn-primary">
+                    <i class="fas fa-arrow-right"></i> ${currentQuestionIndex === currentQuiz.length - 1 ? 'Finish Quiz' : 'Next Question'}
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function nextQuestion() {
+    const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+    
+    if (!selectedAnswer) {
+        alert('Please select an answer before continuing.');
+        return;
+    }
+    
+    userAnswers.push(parseInt(selectedAnswer.value));
+    currentQuestionIndex++;
+    
+    showQuestion();
+}
+
+function showResults() {
+    let correctAnswers = 0;
+    
+    for (let i = 0; i < currentQuiz.length; i++) {
+        if (userAnswers[i] === currentQuiz[i].correct) {
+            correctAnswers++;
+        }
+    }
+    
+    const percentage = Math.round((correctAnswers / currentQuiz.length) * 100);
+    
+    document.getElementById('quiz-content').style.display = 'none';
+    document.getElementById('quiz-results').style.display = 'block';
+    
+    let resultColor = percentage >= 80 ? 'var(--primary-green)' : percentage >= 60 ? 'var(--primary-blue)' : '#e74c3c';
+    let resultIcon = percentage >= 80 ? 'fa-trophy' : percentage >= 60 ? 'fa-thumbs-up' : 'fa-redo';
+    
+    document.getElementById('quiz-results').innerHTML = `
+        <div style="text-align: center; padding: 2rem;">
+            <i class="fas ${resultIcon}" style="font-size: 4rem; color: ${resultColor}; margin-bottom: 1rem;"></i>
+            <h2 style="color: ${resultColor}; margin-bottom: 1rem;">Quiz Complete!</h2>
+            <p style="font-size: 1.5rem; margin-bottom: 2rem;">
+                You scored <strong>${correctAnswers}/${currentQuiz.length}</strong> (${percentage}%)
+            </p>
+            
+            <div style="margin-bottom: 2rem;">
+                ${percentage >= 80 ? 
+                    '<p style="color: var(--primary-green);">Excellent work! You have a strong understanding of this topic.</p>' :
+                    percentage >= 60 ?
+                    '<p style="color: var(--primary-blue);">Good job! Review the topics you missed to improve further.</p>' :
+                    '<p style="color: #e74c3c;">Keep practicing! Focus on understanding the fundamental concepts.</p>'
+                }
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button onclick="generateQuiz()" class="btn btn-primary">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
+                <button onclick="closeQuiz()" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Back to Practice
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <h4 style="color: var(--primary-blue); margin-bottom: 1rem;">Review Answers</h4>
+            ${currentQuiz.map((question, index) => `
+                <div style="padding: 1rem; margin-bottom: 1rem; background-color: var(--card-bg); border-radius: 8px; border-left: 4px solid ${userAnswers[index] === question.correct ? 'var(--primary-green)' : '#e74c3c'};">
+                    <p style="font-weight: bold; margin-bottom: 0.5rem;">${question.question}</p>
+                    <p style="color: ${userAnswers[index] === question.correct ? 'var(--primary-green)' : '#e74c3c'};">
+                        Your answer: ${question.options[userAnswers[index]]}
+                    </p>
+                    ${userAnswers[index] !== question.correct ? `
+                        <p style="color: var(--primary-green);">
+                            Correct answer: ${question.options[question.correct]}
+                        </p>
+                    ` : ''}
+                    <p style="font-size: 0.9rem; color: var(--text-color); margin-top: 0.5rem;">
+                        ${question.explanation}
+                    </p>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function closeQuiz() {
+    document.getElementById('quiz-container').style.display = 'none';
+    currentQuiz = null;
+    currentQuestionIndex = 0;
+    userAnswers = [];
+}
+</script>
+{% endblock %}

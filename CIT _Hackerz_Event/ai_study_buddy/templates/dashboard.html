@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Study Buddy{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 style="color: var(--primary-blue); margin-bottom: 2rem;">
+        <i class="fas fa-tachometer-alt"></i> Welcome back, {{ user_name }}!
+    </h1>
+    
+    {% if not profile %}
+    <div style="text-align: center; padding: 3rem;">
+        <i class="fas fa-user-plus" style="font-size: 4rem; color: var(--primary-green); margin-bottom: 2rem;"></i>
+        <h2 style="color: var(--primary-blue); margin-bottom: 1rem;">Complete Your Profile</h2>
+        <p style="margin-bottom: 2rem; font-size: 1.1rem;">
+            Set up your learning profile to get personalized AI recommendations
+        </p>
+        <a href="{{ url_for('profile_setup') }}" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+            <i class="fas fa-arrow-right"></i> Set Up Profile
+        </a>
+    </div>
+    {% else %}
+    
+    <div class="grid grid-3">
+        <!-- Performance Overview -->
+        <div class="card" style="background: linear-gradient(135deg, var(--light-blue), var(--primary-blue)); color: white;">
+            <h3><i class="fas fa-chart-line"></i> Performance Overview</h3>
+            <div style="margin-top: 1rem;">
+                <p style="font-size: 2rem; font-weight: bold;">{{ profile.analysis.average }}%</p>
+                <p>Average Score</p>
+            </div>
+        </div>
+        
+        <!-- Subjects Count -->
+        <div class="card" style="background: linear-gradient(135deg, var(--light-green), var(--primary-green)); color: white;">
+            <h3><i class="fas fa-book"></i> Active Subjects</h3>
+            <div style="margin-top: 1rem;">
+                <p style="font-size: 2rem; font-weight: bold;">{{ profile.subjects|length }}</p>
+                <p>Subjects Enrolled</p>
+            </div>
+        </div>
+        
+        <!-- Study Streak -->
+        <div class="card" style="background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue)); color: white;">
+            <h3><i class="fas fa-fire"></i> Study Streak</h3>
+            <div style="margin-top: 1rem;">
+                <p style="font-size: 2rem; font-weight: bold;">7</p>
+                <p>Days Active</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-2">
+        <!-- Strengths & Weaknesses -->
+        <div class="card">
+            <h3 style="color: var(--primary-green); margin-bottom: 1.5rem;">
+                <i class="fas fa-thumbs-up"></i> Your Strengths
+            </h3>
+            {% if profile.analysis.strengths %}
+                {% for strength in profile.analysis.strengths %}
+                <div style="background-color: var(--light-green); padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 5px; color: var(--text-color);">
+                    <i class="fas fa-star"></i> {{ strength }} - {{ profile.marks[strength] }}%
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-color); font-style: italic;">Keep studying to identify your strengths!</p>
+            {% endif %}
+            
+            <h3 style="color: var(--primary-blue); margin: 2rem 0 1.5rem 0;">
+                <i class="fas fa-target"></i> Areas for Improvement
+            </h3>
+            {% if profile.analysis.weaknesses %}
+                {% for weakness in profile.analysis.weaknesses %}
+                <div style="background-color: var(--light-blue); padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 5px; color: var(--text-color);">
+                    <i class="fas fa-arrow-up"></i> {{ weakness }} - {{ profile.marks[weakness] }}%
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-color); font-style: italic;">Great job! No weak areas identified.</p>
+            {% endif %}
+        </div>
+        
+        <!-- AI Recommendations -->
+        <div class="card">
+            <h3 style="color: var(--primary-blue); margin-bottom: 1.5rem;">
+                <i class="fas fa-robot"></i> AI Recommendations
+            </h3>
+            {% if profile.analysis.recommendations %}
+                {% for recommendation in profile.analysis.recommendations %}
+                <div style="background-color: var(--card-bg); border-left: 4px solid var(--primary-green); padding: 1rem; margin-bottom: 1rem;">
+                    <i class="fas fa-lightbulb"></i> {{ recommendation }}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-color); font-style: italic;">Keep using the platform to get personalized recommendations!</p>
+            {% endif %}
+            
+            <div style="margin-top: 2rem;">
+                <h4 style="color: var(--primary-green); margin-bottom: 1rem;">Quick Actions</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <a href="{{ url_for('study_planner') }}" class="btn btn-secondary" style="text-align: center;">
+                        <i class="fas fa-calendar-alt"></i> View Study Plan
+                    </a>
+                    <a href="{{ url_for('ai_chat') }}" class="btn btn-secondary" style="text-align: center;">
+                        <i class="fas fa-comments"></i> Ask AI Tutor
+                    </a>
+                    <a href="{{ url_for('practice') }}" class="btn btn-secondary" style="text-align: center;">
+                        <i class="fas fa-brain"></i> Practice Quiz
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Subject Performance Chart -->
+    <div class="card">
+        <h3 style="color: var(--primary-blue); margin-bottom: 2rem;">
+            <i class="fas fa-chart-bar"></i> Subject Performance
+        </h3>
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            {% for subject in profile.subjects %}
+            <div style="text-align: center; padding: 1rem; background-color: var(--bg-color); border-radius: 8px; border: 2px solid var(--border-color);">
+                <h4 style="color: var(--primary-green); margin-bottom: 1rem;">{{ subject }}</h4>
+                <div style="position: relative; width: 100px; height: 100px; margin: 0 auto;">
+                    <svg width="100" height="100" style="transform: rotate(-90deg);">
+                        <circle cx="50" cy="50" r="40" stroke="var(--border-color)" stroke-width="8" fill="none"></circle>
+                        <circle cx="50" cy="50" r="40" stroke="var(--primary-blue)" stroke-width="8" fill="none"
+                                stroke-dasharray="{{ (profile.marks[subject] / 100) * 251.2 }} 251.2"
+                                stroke-linecap="round"></circle>
+                    </svg>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(90deg); font-weight: bold; color: var(--primary-blue);">
+                        {{ profile.marks[subject] }}%
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}AI Chat - AI Study Buddy{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 style="color: var(--primary-blue); margin-bottom: 2rem;">
+        <i class="fas fa-robot"></i> AI Study Assistant
+    </h1>
+    
+    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem; height: 70vh;">
+        <!-- Chat Area -->
+        <div style="display: flex; flex-direction: column;">
+            <div id="chat-messages" style="flex: 1; background-color: var(--card-bg); border: 2px solid var(--border-color); border-radius: 10px; padding: 1rem; overflow-y: auto; margin-bottom: 1rem;">
+                <div class="ai-message">
+                    <div style="background: linear-gradient(135deg, var(--primary-blue), var(--primary-green)); color: white; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                        <strong><i class="fas fa-robot"></i> AI Tutor:</strong>
+                        <p style="margin-top: 0.5rem;">
+                            Hello! I'm your AI study assistant. I'm here to help you understand concepts, solve problems, and answer any academic questions you have. 
+                            Feel free to ask me anything - I'll explain it step by step with examples and analogies to make it easy to understand!
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" id="user-input" placeholder="Ask me anything about your studies..." 
+                       style="flex: 1; padding: 1rem; border: 2px solid var(--border-color); border-radius: 25px; background-color: var(--bg-color); color: var(--text-color);"
+                       onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()" class="btn btn-primary" style="border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Quick Actions Sidebar -->
+        <div>
+            <h3 style="color: var(--primary-green); margin-bottom: 1rem;">
+                <i class="fas fa-lightning-bolt"></i> Quick Help
+            </h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <button onclick="askQuestion('Explain Newton\'s laws of motion with examples')" class="btn btn-secondary" style="text-align: left; padding: 0.75rem;">
+                    <i class="fas fa-atom"></i> Physics Concepts
+                </button>
+                <button onclick="askQuestion('How do I solve quadratic equations step by step?')" class="btn btn-secondary" style="text-align: left; padding: 0.75rem;">
+                    <i class="fas fa-calculator"></i> Math Problems
+                </button>
+                <button onclick="askQuestion('Explain photosynthesis in simple terms')" class="btn btn-secondary" style="text-align: left; padding: 0.75rem;">
+                    <i class="fas fa-leaf"></i> Biology Topics
+                </button>
+                <button onclick="askQuestion('What are the types of chemical reactions?')" class="btn btn-secondary" style="text-align: left; padding: 0.75rem;">
+                    <i class="fas fa-flask"></i> Chemistry Help
+                </button>
+                <button onclick="askQuestion('Create a study plan for my weak subjects')" class="btn btn-secondary" style="text-align: left; padding: 0.75rem;">
+                    <i class="fas fa-calendar-alt"></i> Study Planning
+                </button>
+                <button onclick="askQuestion('Give me practice questions for my upcoming exam')" class="btn btn-secondary" style="text-align: left; padding: 0.75rem;">
+                    <i class="fas fa-question-circle"></i> Practice Questions
+                </button>
+            </div>
+            
+            <div style="margin-top: 2rem; padding: 1rem; background-color: var(--light-green); border-radius: 8px; color: var(--text-color);">
+                <h4><i class="fas fa-lightbulb"></i> Tips for Better Learning</h4>
+                <ul style="margin-top: 1rem; padding-left: 1rem;">
+                    <li>Ask specific questions</li>
+                    <li>Request step-by-step explanations</li>
+                    <li>Ask for examples and analogies</li>
+                    <li>Don't hesitate to ask for clarification</li>
+                </ul>
+            </div>
+            
+            <div style="margin-top: 1rem; padding: 1rem; background-color: var(--light-blue); border-radius: 8px; color: var(--text-color);">
+                <h4><i class="fas fa-info-circle"></i> What I Can Help With</h4>
+                <ul style="margin-top: 1rem; padding-left: 1rem;">
+                    <li>Concept explanations</li>
+                    <li>Problem solving</li>
+                    <li>Study strategies</li>
+                    <li>Exam preparation</li>
+                    <li>Homework help</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+
+function askQuestion(question) {
+    document.getElementById('user-input').value = question;
+    sendMessage();
+}
+
+async function sendMessage() {
+    const input = document.getElementById('user-input');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    const chatMessages = document.getElementById('chat-messages');
+    
+    // Add user message
+    const userMessageDiv = document.createElement('div');
+    userMessageDiv.className = 'user-message';
+    userMessageDiv.innerHTML = `
+        <div style="background-color: var(--primary-blue); color: white; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; margin-left: 2rem;">
+            <strong><i class="fas fa-user"></i> You:</strong>
+            <p style="margin-top: 0.5rem;">${message}</p>
+        </div>
+    `;
+    chatMessages.appendChild(userMessageDiv);
+    
+    // Clear input
+    input.value = '';
+    
+    // Add typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'typing-indicator';
+    typingDiv.innerHTML = `
+        <div style="background-color: var(--card-bg); border: 2px solid var(--border-color); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+            <strong><i class="fas fa-robot"></i> AI Tutor:</strong>
+            <p style="margin-top: 0.5rem;"><i class="fas fa-spinner fa-spin"></i> Thinking...</p>
+        </div>
+    `;
+    chatMessages.appendChild(typingDiv);
+    
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    try {
+        const response = await fetch('/chat-response', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ question: message })
+        });
+        
+        const data = await response.json();
+        
+        // Remove typing indicator
+        document.getElementById('typing-indicator').remove();
+        
+        // Add AI response
+        const aiMessageDiv = document.createElement('div');
+        aiMessageDiv.className = 'ai-message';
+        aiMessageDiv.innerHTML = `
+            <div style="background: linear-gradient(135deg, var(--primary-green), var(--light-green)); color: var(--text-color); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                <strong><i class="fas fa-robot"></i> AI Tutor:</strong>
+                <p style="margin-top: 0.5rem;">${data.response}</p>
+            </div>
+        `;
+        chatMessages.appendChild(aiMessageDiv);
+        
+    } catch (error) {
+        // Remove typing indicator
+        document.getElementById('typing-indicator').remove();
+        
+        // Add error message
+        const errorDiv = document.createElement('div');
+        errorDiv.innerHTML = `
+            <div style="background-color: #f8d7da; color: #721c24; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #f5c6cb;">
+                <strong><i class="fas fa-exclamation-triangle"></i> Error:</strong>
+                <p style="margin-top: 0.5rem;">Sorry, I'm having trouble responding right now. Please try again.</p>
+            </div>
+        `;
+        chatMessages.appendChild(errorDiv);
+    }
+    
+    // Scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Auto-focus on input when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('user-input').focus();
+});
+</script>
+{% endblock %}
